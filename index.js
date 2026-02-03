@@ -1,3 +1,4 @@
+process.removeAllListeners('warning');
 require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
 const { DisTube } = require('distube');
