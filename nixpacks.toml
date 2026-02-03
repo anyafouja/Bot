@@ -1,0 +1,5 @@
+[phases.build]
+nixPkgs = ["ffmpeg"]
+
+[phases.setup]
+nixPkgs = ["ffmpeg"]

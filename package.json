@@ -1,0 +1,13 @@
+{
+  "name": "bot-musik",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": { "start": "node index.js" },
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "distube": "^5.0.0",
+    "@distube/yt-dlp": "^2.0.0",
+    "ffmpeg-static": "^5.2.0",
+    "dotenv": "^16.4.5"
+  }
+}
