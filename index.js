@@ -2,48 +2,48 @@ process.removeAllListeners('warning');
 require('dotenv').config();
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes } = require('discord.js');
 const { DisTube } = require('distube');
-const { YtDlpPlugin } = require('@distube/yt-dlp');
+const { YtDlpPlugin } = require('@distube/yt-dlp'); // Tetap import tapi tidak dipakai di config
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.MessageContent]
 });
 
-const distube = new DisTube(client, { plugins: [new YtDlpPlugin()] });
+// Kita matikan plugin YtDlp pakai config kosong {}
+const distube = new DisTube(client, {
+    plugins: []
+});
 
-// Kode untuk daftarin command /play
+// Kode Command Slash (Sama seperti sebelumnya)
 const commands = [
-    new SlashCommandBuilder().setName('play').setDescription('Putar lagu').addStringOption(option =>
-    option.setName('lagu').setDescription('Link atau judul lagu').setRequired(true)
-    ),
-new SlashCommandBuilder().setName('skip').setDescription('Lewati lagu'),
-new SlashCommandBuilder().setName('stop').setDescription('Stop musik')
+    new SlashCommandBuilder().setName('play').setDescription('Putar lagu').addStringOption(option => option.setName('lagu').setDescription('Link atau judul lagu').setRequired(true)),
+    new SlashCommandBuilder().setName('skip').setDescription('Lewati lagu'),
+    new SlashCommandBuilder().setName('stop').setDescription('Stop musik')
 ].map(command => command.toJSON());
 
-// Push Command ke Discord (Hanya sekali saat online)
+const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+
 client.once('ready', async () => {
     console.log(`Bot Online: ${client.user.tag}`);
     try {
         await rest.put(Routes.applicationCommands(client.user.id), { body: commands });
-    } catch (error) {
-        console.error(error);
-    }
+        console.log('Slash commands registered!');
+    } catch (error) { console.error(error); }
 });
 
 client.on('interactionCreate', async interaction => {
     if (!interaction.isChatInputCommand()) return;
-
     const { commandName } = interaction;
+    const { channel } = interaction.member.voice;
 
     if (commandName === 'play') {
         const query = interaction.options.getString('lagu');
-        const { channel } = interaction.member.voice;
-        if (!channel) return interaction.reply('Kamu harus masuk VC dulu!');
+        if (!channel) return interaction.reply('Masuk VC dulu!');
 
         await interaction.reply('🔎 Mencari lagu...');
         distube.play(channel, query, {
             member: interaction.member,
             textChannel: interaction.channel,
-            message: await interaction.fetchReply() // Kirim notifikasi via edit reply
+            message: await interaction.fetchReply()
         });
     }
 
@@ -69,5 +69,4 @@ distube.on('error', (channel, e) => {
     if(channel) channel.send(`❌ Error: ${e.message}`);
 });
 
-const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 client.login(process.env.TOKEN);
