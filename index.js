@@ -1,18 +1,18 @@
 process.removeAllListeners('warning');
 require('dotenv').config();
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes } = require('discord.js');
-const { DisTube } = require('distube'); // Hanya import Distube
+const { Player } = require('discord-player');
+const { QueryType } = require('discord-player');
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.MessageContent]
 });
 
-// Konfigurasi DisTube TANPA plugin yt-dlp
-const distube = new DisTube(client, {
-    plugins: []
-});
+const player = new Player(client);
 
-// Definisi Slash Commands
+player.extractors.loadDefault();
+
+// Slash Commands
 const commands = [
     new SlashCommandBuilder().setName('play').setDescription('Putar lagu').addStringOption(option => option.setName('lagu').setDescription('Link atau judul lagu').setRequired(true)),
     new SlashCommandBuilder().setName('skip').setDescription('Lewati lagu'),
@@ -39,33 +39,35 @@ client.on('interactionCreate', async interaction => {
         if (!channel) return interaction.reply('Masuk VC dulu!');
 
         await interaction.reply('🔎 Mencari lagu...');
-        distube.play(channel, query, {
-            member: interaction.member,
-            textChannel: interaction.channel,
-            message: await interaction.fetchReply()
-        });
+
+        try {
+            const { track } = await player.play(channel, query, {
+                queryType: QueryType.AUTO
+            });
+            await interaction.editReply(`🎶 Memutar: \`${track.title}\``);
+        } catch (e) {
+            console.log(e);
+            return interaction.editReply('❌ Lagu tidak ditemukan.');
+        }
     }
 
     if (commandName === 'skip') {
-        const queue = distube.getQueue(interaction);
-        if (!queue) return interaction.reply('Tidak ada lagu.');
-        queue.skip();
+        const queue = player.queues.get(interaction.guildId);
+        if (!queue || !queue.currentTrack) return interaction.reply('Tidak ada lagu.');
+        queue.node.skip();
         interaction.reply('⏭️ Skip!');
     }
 
     if (commandName === 'stop') {
-        distube.stop(interaction);
+        const queue = player.queues.get(interaction.guildId);
+        if (!queue) return interaction.reply('Tidak ada lagu.');
+        queue.node.stop();
         interaction.reply('⏹️ Stop!');
     }
 });
 
-distube.on('playSong', (queue, song) => {
-    queue.textChannel.send(`🎶 Memutar: \`${song.name}\``);
-});
-
-distube.on('error', (channel, e) => {
-    console.error(e);
-    if(channel) channel.send(`❌ Error: ${e.message}`);
+player.events.on('playerError', (queue, error) => {
+    console.error(`Player Error: ${error.message}`);
 });
 
 client.login(process.env.TOKEN);
