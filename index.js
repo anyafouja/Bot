@@ -1,19 +1,18 @@
 process.removeAllListeners('warning');
 require('dotenv').config();
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes } = require('discord.js');
-const { DisTube } = require('distube');
-const { YtDlpPlugin } = require('@distube/yt-dlp'); // Tetap import tapi tidak dipakai di config
+const { DisTube } = require('distube'); // Hanya import Distube
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.MessageContent]
 });
 
-// Kita matikan plugin YtDlp pakai config kosong {}
+// Konfigurasi DisTube TANPA plugin yt-dlp
 const distube = new DisTube(client, {
     plugins: []
 });
 
-// Kode Command Slash (Sama seperti sebelumnya)
+// Definisi Slash Commands
 const commands = [
     new SlashCommandBuilder().setName('play').setDescription('Putar lagu').addStringOption(option => option.setName('lagu').setDescription('Link atau judul lagu').setRequired(true)),
     new SlashCommandBuilder().setName('skip').setDescription('Lewati lagu'),
