@@ -2,18 +2,17 @@ process.removeAllListeners('warning');
 require('dotenv').config();
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes } = require('discord.js');
 const { DisTube } = require('distube');
-const { YtDlpPlugin } = require('@distube/yt-dlp');
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.MessageContent]
 });
 
-// Setup DisTube v4
+// KITA HAPUS IMPORT YTDLP DAN KOSONGKAN PLUGINS
 const distube = new DisTube(client, {
     searchSongs: 10,
     leaveOnEmpty: true,
     emptyCooldown: 30,
-    plugins: [new YtDlpPlugin()]
+    plugins: [] // Kosong = Gunakan default extractors
 });
 
 // Slash Commands
