@@ -1,1 +1,5 @@
-404: Not Found
+[phases.build]
+nixPkgs = ["ffmpeg"]
+
+[phases.setup]
+nixPkgs = ["ffmpeg"]
