@@ -3,14 +3,25 @@ require('dotenv').config();
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes } = require('discord.js');
 const { Player } = require('discord-player');
 const { QueryType } = require('discord-player');
+const { useMainPlayer } = require('discord-player');
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.MessageContent]
 });
 
+// Cara Load Player Baru
 const player = new Player(client);
 
-player.extractors.loadDefault();
+// Memastikan Extractor YouTube Terpasang
+(async () => {
+    await player.extractors.loadMulti([
+        require('@discord-player/extractor').SpotifyExtractor,
+                                      require('@discord-player/extractor').SoundCloudExtractor,
+                                      require('@discord-player/extractor').AppleMusicExtractor,
+                                      require('@discord-player/extractor').YouTubeExtractor // Paksa install YouTube
+    ]);
+    console.log('Extractors loaded!');
+})();
 
 // Slash Commands
 const commands = [
