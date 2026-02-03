@@ -1,27 +1,18 @@
 process.removeAllListeners('warning');
 require('dotenv').config();
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes } = require('discord.js');
-const { Player } = require('discord-player');
-const { QueryType } = require('discord-player');
-const { useMainPlayer } = require('discord-player');
+const { Player, QueryType } = require('discord-player');
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.MessageContent]
 });
 
-// Cara Load Player Baru
+// Inisialisasi Player
 const player = new Player(client);
 
-// Memastikan Extractor YouTube Terpasang
-(async () => {
-    await player.extractors.loadMulti([
-        require('@discord-player/extractor').SpotifyExtractor,
-                                      require('@discord-player/extractor').SoundCloudExtractor,
-                                      require('@discord-player/extractor').AppleMusicExtractor,
-                                      require('@discord-player/extractor').YouTubeExtractor // Paksa install YouTube
-    ]);
-    console.log('Extractors loaded!');
-})();
+// Load Extractors Default + Paket Tambahan
+player.extractors.loadDefault();
+console.log('Extractors loaded!');
 
 // Slash Commands
 const commands = [
@@ -58,7 +49,7 @@ client.on('interactionCreate', async interaction => {
             await interaction.editReply(`🎶 Memutar: \`${track.title}\``);
         } catch (e) {
             console.log(e);
-            return interaction.editReply('❌ Lagu tidak ditemukan.');
+            return interaction.editReply('❌ Lagu tidak ditemukan atau extractor error.');
         }
     }
 
