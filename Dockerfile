@@ -1,9 +1,9 @@
-FROM node:20-bullseye-slim
+FROM node:20
 
 WORKDIR /app
 
-# Install FFmpeg langsung dari sistem Debian
-RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+# Install FFmpeg dan Python3 (YTDLP butuh ini)
+RUN apt-get update && apt-get install -y ffmpeg python3 && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 RUN npm install
